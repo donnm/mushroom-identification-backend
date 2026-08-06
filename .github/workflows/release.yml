@@ -1,0 +1,78 @@
+name: Release Docker Image
+
+# Builds and publishes the backend image to GitHub Container Registry.
+# Triggered by pushing a version tag, which is what "Create a new release"
+# in the GitHub UI does under the hood.
+#
+#   git tag v1.1.0 && git push origin v1.1.0
+#
+# Tests are not re-run here; they already gate merges to main via backend.yml.
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # v1.2.3 produces the tags 1.2.3, 1.2, 1 and latest.
+      # A pre-release such as v1.2.3-rc1 produces only 1.2.3-rc1, never latest.
+      # The branch and sha entries only fire on a manual run, which would
+      # otherwise produce no tags at all and fail the push.
+      - name: Derive image tags and labels
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=ref,event=branch
+            type=sha,format=short
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # Keeps a single clean manifest in the GHCR UI instead of extra
+          # "unknown/unknown" attestation entries
+          provenance: false
+
+      - name: Summarise published tags
+        run: |
+          echo "### Published images" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

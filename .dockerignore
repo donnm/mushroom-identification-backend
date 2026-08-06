@@ -1,0 +1,15 @@
+target/
+.git
+.github
+.idea
+.vscode
+.mvn
+mvnw
+mvnw.cmd
+uploads/
+*.iml
+.env
+README.md
+LICENSE
+cloudbuild.yaml
+docker-compose.yml
