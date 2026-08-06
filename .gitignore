@@ -34,3 +34,6 @@ build/
 
 # Secrets
 .env
+
+# Uploaded images. Written at runtime, and also by ImageServiceTest.
+uploads/
