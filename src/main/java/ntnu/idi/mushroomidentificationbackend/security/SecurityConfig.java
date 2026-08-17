@@ -17,13 +17,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final JWTUtil jwtUtil;
+  private final TokenBlocklistService tokenBlocklistService;
   private static final String SUPERUSER_ROLE = "SUPERUSER";
   private static final String MODERATOR_ROLE = "MODERATOR";
   private static final String USER_ROLE = "USER";
 
 
-  public SecurityConfig(JWTUtil jwtUtil) {
+  public SecurityConfig(JWTUtil jwtUtil, TokenBlocklistService tokenBlocklistService) {
     this.jwtUtil = jwtUtil;
+    this.tokenBlocklistService = tokenBlocklistService;
   }
 
   /**
@@ -48,14 +50,17 @@ public class SecurityConfig {
             .requestMatchers("/api/images/**").permitAll()
             .requestMatchers("/api/websocket/**").permitAll()
             .requestMatchers("/api/stats/**").permitAll()
-            .requestMatchers("/api/**").hasAnyRole(SUPERUSER_ROLE, MODERATOR_ROLE, USER_ROLE)
+            // More specific matchers must be evaluated before the broader /api/** and
+            // /admin/** rules below, since Spring Security applies only the first match.
+            .requestMatchers("/admin/superuser/**").hasRole(SUPERUSER_ROLE)
             .requestMatchers("/api/admin/**").hasAnyRole(SUPERUSER_ROLE, MODERATOR_ROLE)
             .requestMatchers("/admin/**").hasAnyRole(SUPERUSER_ROLE, MODERATOR_ROLE)
-            .requestMatchers("/admin/superuser/**").hasRole(SUPERUSER_ROLE)
+            .requestMatchers("/api/**").hasAnyRole(SUPERUSER_ROLE, MODERATOR_ROLE, USER_ROLE)
             .requestMatchers("/ws/**").permitAll()
             .anyRequest().authenticated()
         )
-        .addFilterBefore(new JWTAuthorizationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(new JWTAuthorizationFilter(jwtUtil, tokenBlocklistService),
+            UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

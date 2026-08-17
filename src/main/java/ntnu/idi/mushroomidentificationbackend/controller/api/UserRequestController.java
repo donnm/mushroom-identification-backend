@@ -1,6 +1,7 @@
 package ntnu.idi.mushroomidentificationbackend.controller.api;
 
 
+import jakarta.validation.Valid;
 import java.util.logging.Logger;
 import ntnu.idi.mushroomidentificationbackend.dto.request.NewUserRequestDTO;
 import ntnu.idi.mushroomidentificationbackend.dto.response.UserRequestDTO;
@@ -48,7 +49,7 @@ public class UserRequestController {
    * @return ResponseEntity containing the reference code for the new user request
    */
   @PostMapping("/create")
-  public ResponseEntity<String> createUserRequest(@ModelAttribute NewUserRequestDTO newUserRequestDTO) {
+  public ResponseEntity<String> createUserRequest(@Valid @ModelAttribute NewUserRequestDTO newUserRequestDTO) {
     logger.info("Received new user request");
     String referenceCode = userRequestService.processNewUserRequest(newUserRequestDTO);
     return ResponseEntity.ok(referenceCode);

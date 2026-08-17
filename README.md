@@ -175,8 +175,9 @@ The backend exposes a set of REST- and WebSocket-based endpoints, organized by a
 
 | Method | Endpoint               | Description                                                      |
 |--------|------------------------|------------------------------------------------------------------|
-| POST   | `/auth/admin/login`    | Authenticate an admin (expert) user and receive a JWT token.    |
+| POST   | `/auth/admin/login`    | Authenticate an admin (expert) user and receive a JWT token. Repeated failed attempts from the same client/username are temporarily rate limited. |
 | POST   | `/auth/user/login`     | Authenticate an anonymous user for chat access and receive a JWT token. |
+| POST   | `/auth/logout`         | Revoke the caller's JWT (Authorization header) so it can no longer be used, even before it naturally expires. |
 
 ---
 
