@@ -192,7 +192,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(UsernameAlreadyExistsException.class)
   public ResponseEntity<Map<String, String>> handleUsernameAlreadyExistsException(UsernameAlreadyExistsException e) {
     return buildResponse(HttpStatus.CONFLICT,
-        "Obs! This username is already taken",
+        "This username is already taken.",
         "USERNAME_CONFLICT");
   }
 
