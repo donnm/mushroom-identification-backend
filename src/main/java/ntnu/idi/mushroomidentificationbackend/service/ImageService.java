@@ -28,7 +28,7 @@ public class ImageService {
 
   private static final String UPLOAD_DIR = "uploads/";
   private static final List<String> ALLOWED_MIME_TYPES = List.of(MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE);
-  private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
+  private static final long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB limit
   private static final Logger logger = Logger.getLogger(ImageService.class.getName());
   private static final String REGEX_SANITIZE = "[^a-zA-Z0-9_-]";
   private static final Tika TIKA = new Tika();
@@ -59,7 +59,7 @@ public class ImageService {
     // **Check file size**
     if (file.getSize() > MAX_FILE_SIZE) {
       LogHelper.info(logger, "File is too large. Max allowed size is {0}MB and the file was {1}MB", MAX_FILE_SIZE / (1024 * 1024), file.getSize() / (1024 * 1024));
-      throw new ImageProcessingException("File is too large. Max allowed size is 10MB.");
+      throw new ImageProcessingException("File is too large. Max allowed size is 50MB.");
     }
 
     byte[] content = file.getBytes();
