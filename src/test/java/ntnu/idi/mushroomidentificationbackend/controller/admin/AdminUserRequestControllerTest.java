@@ -56,7 +56,7 @@ class AdminUserRequestControllerTest {
   @Test
   void getAllRequestsPaginated_returnsPage() throws Exception {
     Page<UserRequestDTO> page = new PageImpl<>(Collections.singletonList(new UserRequestDTO()));
-    when(userRequestService.getPaginatedUserRequests(any())).thenReturn(page);
+    when(userRequestService.getFilteredUserRequests(any(), anyBoolean(), any(), any(), any())).thenReturn(page);
 
     mockMvc.perform(get("/api/admin/requests"))
         .andExpect(status().isOk());

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -134,16 +135,17 @@ class UserRequestServiceTest {
   }
 
   @Test
-  void getPaginatedUserRequests_returnsMappedResults() {
+  void getFilteredUserRequests_returnsMappedResults() {
     UserRequest req = new UserRequest();
     req.setUserRequestId("123");
     Page<UserRequest> page = new PageImpl<>(List.of(req));
 
-    when(userRequestRepository.findAllByOrderByUpdatedAtDesc(any())).thenReturn(page);
+    when(userRequestRepository.findAll(any(Specification.class), any(PageRequest.class))).thenReturn(page);
     when(mushroomRepository.countByUserRequest(req)).thenReturn(2L);
     when(mushroomService.getBasketSummaryBadges("123")).thenReturn(List.of());
+    when(mushroomService.getMushroomStatusCounts("123")).thenReturn(Map.of());
 
-    Page result = userRequestService.getPaginatedUserRequests(PageRequest.of(0, 10));
+    Page result = userRequestService.getFilteredUserRequests(null, false, null, null, PageRequest.of(0, 10));
     assertEquals(1, result.getTotalElements());
   }
 }
