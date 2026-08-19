@@ -100,5 +100,7 @@ class UserRequestControllerTest {
             .file(image)
             .param("text", "Found this in the forest"))
         .andExpect(status().isOk());
+
+    verify(webSocketNotificationHandler).sendAdminBroadcast(WebsocketNotificationType.NEW_REQUEST_IN_QUEUE);
   }
 }

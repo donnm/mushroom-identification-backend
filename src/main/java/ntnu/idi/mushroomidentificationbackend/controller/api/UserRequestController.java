@@ -52,6 +52,7 @@ public class UserRequestController {
   public ResponseEntity<String> createUserRequest(@Valid @ModelAttribute NewUserRequestDTO newUserRequestDTO) {
     logger.info("Received new user request");
     String referenceCode = userRequestService.processNewUserRequest(newUserRequestDTO);
+    webSocketNotificationHandler.sendAdminBroadcast(WebsocketNotificationType.NEW_REQUEST_IN_QUEUE);
     return ResponseEntity.ok(referenceCode);
   }
 
