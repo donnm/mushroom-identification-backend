@@ -35,6 +35,7 @@ public class UserRequestMapper {
     dto.setBasketSummaryBadges(badges);
     dto.setNumberOfMushrooms(mushroomCount);
     dto.setMushroomStatusCounts(mushroomStatusCounts);
+    dto.setHasFollowUp(userRequest.isHasFollowUp());
     if (userRequest.getAdmin() != null) {
       dto.setUsername(userRequest.getAdmin().getUsername());
     }

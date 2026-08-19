@@ -29,6 +29,6 @@ public class UserRequestDTO {
   private String username;
   private List<BasketBadgeType> basketSummaryBadges;
   private Map<MushroomStatus, Long> mushroomStatusCounts;
-
+  private boolean hasFollowUp;
 
 }

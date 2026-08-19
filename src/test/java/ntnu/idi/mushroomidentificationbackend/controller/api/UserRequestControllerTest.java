@@ -59,7 +59,7 @@ class UserRequestControllerTest {
   void getRequest_returnsUserRequestDTO() throws Exception {
     String token = "Bearer testtoken";
     String requestId = "abc123";
-    UserRequestDTO dto = new UserRequestDTO(requestId, new Date(), new Date(), null, 3, null, null, null);
+    UserRequestDTO dto = new UserRequestDTO(requestId, new Date(), new Date(), null, 3, null, null, null, false);
 
     when(jwtUtil.extractUsername("testtoken")).thenReturn(requestId);
     when(userRequestService.getUserRequestDTO(requestId)).thenReturn(dto);

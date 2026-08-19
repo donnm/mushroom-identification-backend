@@ -49,6 +49,10 @@ public class UserRequest {
   @Temporal(TemporalType.TIMESTAMP)
   private Date updatedAt;
   private UserRequestStatus status;
+  // True when the user has sent a message on this request since it was marked
+  // COMPLETED, without the owning admin having replied yet - lets a completed
+  // request stay completed while still surfacing a follow-up to its admin.
+  private boolean hasFollowUp;
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "username")
   @Exclude

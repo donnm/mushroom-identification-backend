@@ -2,7 +2,6 @@ package ntnu.idi.mushroomidentificationbackend.service;
 
 import ntnu.idi.mushroomidentificationbackend.dto.request.ChangeRequestStatusDTO;
 import ntnu.idi.mushroomidentificationbackend.dto.request.NewUserRequestDTO;
-import ntnu.idi.mushroomidentificationbackend.exception.DatabaseOperationException;
 import ntnu.idi.mushroomidentificationbackend.exception.RequestLockedException;
 import ntnu.idi.mushroomidentificationbackend.exception.RequestNotFoundException;
 import ntnu.idi.mushroomidentificationbackend.model.entity.Admin;
@@ -107,14 +106,30 @@ class UserRequestServiceTest {
   }
 
   @Test
-  void updateProjectAfterMessage_throwsIfCompleted() {
+  void updateProjectAfterMessage_whenCompletedAndUserReplies_setsFollowUpFlagWithoutChangingStatus() {
     UserRequest request = new UserRequest();
     request.setStatus(UserRequestStatus.COMPLETED);
     when(userRequestRepository.findByUserRequestId("123")).thenReturn(Optional.of(request));
 
-    assertThrows(DatabaseOperationException.class, () ->
-        userRequestService.updateProjectAfterMessage("123", MessageSenderType.USER)
-    );
+    userRequestService.updateProjectAfterMessage("123", MessageSenderType.USER);
+
+    assertEquals(UserRequestStatus.COMPLETED, request.getStatus());
+    assertTrue(request.isHasFollowUp());
+    verify(userRequestRepository).save(request);
+  }
+
+  @Test
+  void updateProjectAfterMessage_whenCompletedAndAdminReplies_clearsFollowUpFlag() {
+    UserRequest request = new UserRequest();
+    request.setStatus(UserRequestStatus.COMPLETED);
+    request.setHasFollowUp(true);
+    when(userRequestRepository.findByUserRequestId("123")).thenReturn(Optional.of(request));
+
+    userRequestService.updateProjectAfterMessage("123", MessageSenderType.ADMIN);
+
+    assertEquals(UserRequestStatus.COMPLETED, request.getStatus());
+    assertFalse(request.isHasFollowUp());
+    verify(userRequestRepository).save(request);
   }
 
   @Test

@@ -263,24 +263,29 @@ public class UserRequestService {
     }
 
     /**
-     * Update the status of a user request after a message is sent.
+     * Update a user request after a message is sent.
      * If the sender is a user and the status is PENDING, set it to NEW.
-     * Otherwise, do nothing.
+     * If the request is already COMPLETED, it stays completed - instead this
+     * tracks whether the user is waiting on a reply from the owning admin via
+     * hasFollowUp, set on a user message and cleared on an admin reply.
      *
      * @param userRequestId the ID of the user request
      * @param senderType the type of sender (user or admin)
      */
   public void updateProjectAfterMessage(String userRequestId, MessageSenderType senderType) {
         UserRequest userRequest = getUserRequest(userRequestId);
-        
-        if (userRequest.getStatus() == UserRequestStatus.COMPLETED) {
-            throw new DatabaseOperationException("Cannot update a completed user request");
-        }
         userRequest.setUpdatedAt(new Date());
+
+        if (userRequest.getStatus() == UserRequestStatus.COMPLETED) {
+            userRequest.setHasFollowUp(senderType == MessageSenderType.USER);
+            userRequestRepository.save(userRequest);
+            return;
+        }
+
         // If the sender is a user and the status is PENDING, set it to NEW
         if (senderType == MessageSenderType.USER && userRequest.getStatus() == UserRequestStatus.PENDING) {
             userRequest.setStatus(UserRequestStatus.NEW);
-        } 
+        }
         userRequestRepository.save(userRequest);
   }
 
