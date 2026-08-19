@@ -356,4 +356,22 @@ public class UserRequestService {
             userRequestRepository.save(userRequest);
         }
     }
+
+    /**
+     * Forcibly releases a user request from whichever admin currently owns it and puts it
+     * back into the queue, regardless of who owns it. Unlike {@link #releaseRequestIfLockedByAdmin},
+     * this isn't gated on the caller being the current owner - it's a superuser-only escape hatch
+     * for reclaiming a request whose assigned moderator has stopped responding.
+     *
+     * @param userRequestId the ID of the user request to release
+     * @throws RequestNotFoundException if no such request exists
+     */
+    public void forceReleaseRequest(String userRequestId) {
+        UserRequest userRequest = getUserRequest(userRequestId);
+        userRequest.setAdmin(null);
+        if (userRequest.getStatus() == UserRequestStatus.IN_PROGRESS) {
+            userRequest.setStatus(UserRequestStatus.NEW);
+        }
+        userRequestRepository.save(userRequest);
+    }
 }

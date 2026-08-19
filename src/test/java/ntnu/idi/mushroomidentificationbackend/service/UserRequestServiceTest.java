@@ -135,6 +135,22 @@ class UserRequestServiceTest {
   }
 
   @Test
+  void forceReleaseRequest_clearsOwnerAndReopensRegardlessOfOwner() {
+    UserRequest request = new UserRequest();
+    Admin owner = new Admin();
+    owner.setUsername("someModerator");
+    request.setAdmin(owner);
+    request.setStatus(UserRequestStatus.IN_PROGRESS);
+    when(userRequestRepository.findByUserRequestId("123")).thenReturn(Optional.of(request));
+
+    userRequestService.forceReleaseRequest("123");
+
+    assertNull(request.getAdmin());
+    assertEquals(UserRequestStatus.NEW, request.getStatus());
+    verify(userRequestRepository).save(request);
+  }
+
+  @Test
   void getFilteredUserRequests_returnsMappedResults() {
     UserRequest req = new UserRequest();
     req.setUserRequestId("123");

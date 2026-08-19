@@ -130,6 +130,23 @@ public class AdminUserRequestController {
   }
 
   /**
+   * Forcibly releases a user request from whichever admin currently owns it and puts it back
+   * into the queue. Superuser-only: lets a superuser reclaim a request whose assigned
+   * moderator has stopped responding, without needing to be the current owner themselves.
+   *
+   * @param userRequestId the ID of the user request to release
+   * @return ResponseEntity containing a confirmation message
+   */
+  @PostMapping("/{userRequestId}/release")
+  public ResponseEntity<String> releaseRequest(@PathVariable String userRequestId) {
+    logger.info(() -> String.format("Received request to force-release user request %s", userRequestId));
+    userRequestService.forceReleaseRequest(userRequestId);
+    webSocketNotificationHandler.sendRequestUpdateToObservers(userRequestId, WebsocketNotificationType.STATUS_CHANGED);
+    webSocketNotificationHandler.sendRequestUpdateToObservers(userRequestId, WebsocketNotificationType.ADMIN_LEFT_REQUEST);
+    return ResponseEntity.ok("The request was released and placed back into the queue.");
+  }
+
+  /**
    * Retrieves the next user request from the queue.
    * This endpoint is used to fetch the next user request
    * that is currently under review.

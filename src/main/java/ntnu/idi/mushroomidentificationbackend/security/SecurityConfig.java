@@ -60,6 +60,7 @@ public class SecurityConfig {
             // More specific matchers must be evaluated before the broader /api/** and
             // /admin/** rules below, since Spring Security applies only the first match.
             .requestMatchers("/admin/superuser/**").hasRole(SUPERUSER_ROLE)
+            .requestMatchers("/api/admin/requests/*/release").hasRole(SUPERUSER_ROLE)
             .requestMatchers("/api/admin/**").hasAnyRole(SUPERUSER_ROLE, MODERATOR_ROLE)
             .requestMatchers("/admin/**").hasAnyRole(SUPERUSER_ROLE, MODERATOR_ROLE)
             .requestMatchers("/api/**").hasAnyRole(SUPERUSER_ROLE, MODERATOR_ROLE, USER_ROLE)

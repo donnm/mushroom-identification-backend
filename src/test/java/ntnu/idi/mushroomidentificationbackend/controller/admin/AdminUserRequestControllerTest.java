@@ -98,6 +98,16 @@ class AdminUserRequestControllerTest {
   }
 
   @Test
+  void releaseRequest_callsServiceAndNotifiesObservers() throws Exception {
+    mockMvc.perform(post("/api/admin/requests/id1/release"))
+        .andExpect(status().isOk());
+
+    verify(userRequestService).forceReleaseRequest("id1");
+    verify(webSocketNotificationHandler, times(2))
+        .sendRequestUpdateToObservers(eq("id1"), any());
+  }
+
+  @Test
   void getNextRequestFromQueue_returnsRequestOrNoContent() throws Exception {
     when(userRequestService.getNextRequestFromQueue()).thenReturn(new UserRequestDTO());
 
