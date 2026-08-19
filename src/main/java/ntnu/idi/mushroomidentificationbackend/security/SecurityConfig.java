@@ -43,6 +43,13 @@ public class SecurityConfig {
     http
         .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(authz -> authz
+            // Spring Boot's error controller is reached via an internal Tomcat
+            // dispatch (RequestDispatcher.include) whenever a filter/handler calls
+            // sendError() or an exception escapes normal MVC handling - it re-enters
+            // this same filter chain, without the original request's role in scope.
+            // Without this rule the error dispatch itself gets denied, so callers see
+            // a generic 403 instead of the actual underlying error (401, 400, 500...).
+            .requestMatchers("/error").permitAll()
             .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
             .requestMatchers("/auth/admin/login").permitAll()
             .requestMatchers("/auth/user/login").permitAll()
